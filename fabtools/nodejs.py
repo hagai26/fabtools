@@ -26,11 +26,13 @@ from fabtools.utils import run_as_root
 DEFAULT_VERSION = '0.10.13'
 
 
-def install_from_source(version=DEFAULT_VERSION, checkinstall=False):
+def install_from_source(version=DEFAULT_VERSION, checkinstall=False, dist_num=None):
     """
     Install Node JS from source.
 
     If *checkinstall* is ``True``, a distribution package will be built.
+    
+    set dist_num to set make -j value 
 
     ::
 
@@ -79,15 +81,24 @@ def install_from_source(version=DEFAULT_VERSION, checkinstall=False):
         'filename': filename,
     })
     run('tar -xzf %s' % filename)
-    with cd(foldername):
-        run('./configure')
-        run('make -j%d' % (cpus() + 1))
-        if checkinstall:
-            run_as_root('checkinstall -y --pkgname=nodejs --pkgversion=%(version) '
-                        '--showinstall=no make install' % locals())
+    cpus_num = None
+    if dist_num:
+        if dist_num > 0:
+            cpus_num = dist_num
         else:
-            run_as_root('make install')
-    run('rm -rf %(filename)s %(foldername)s' % locals())
+            abort("dist_num should be positive")
+    else:
+        cpus_num = cpus() + 1
+    if cpus_num:
+        with cd(foldername):
+            run('./configure')
+            run('make -j%d' % cpus_num)
+            if checkinstall:
+                run_as_root('checkinstall -y --pkgname=nodejs --pkgversion=%(version) '
+                            '--showinstall=no make install' % locals())
+            else:
+                run_as_root('make install')
+        run('rm -rf %(filename)s %(foldername)s' % locals())
 
 
 def version(node='node'):

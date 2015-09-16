@@ -11,13 +11,14 @@ packages using `npm`_.
 .. _npm: http://npmjs.org/
 
 """
-
 from fabtools import nodejs
 
 
-def installed_from_source(version=nodejs.DEFAULT_VERSION):
+def installed_from_source(version=nodejs.DEFAULT_VERSION, dist_num=None):
     """
     Require Node.js to be installed from source.
+    
+    set dist_num to set make -j value
 
     ::
 
@@ -27,7 +28,7 @@ def installed_from_source(version=nodejs.DEFAULT_VERSION):
 
     """
     if nodejs.version() != version:
-        nodejs.install_from_source(version)
+        nodejs.install_from_source(version, dist_num)
 
 
 def package(pkg_name, version=None, local=False):
